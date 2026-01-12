@@ -5,15 +5,13 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Donate Bridge — Demo</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-p6O1X+fZq1n2v0k2QYqk2ZJYF9K1p4x6+I3Yw5Q6z0nV8T9Vq8s1p2QbOe7G6Qq7" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
 
   <style>
     :root{--bg:#0f172a;--card:#0b1220;--accent1:#7c3aed;--accent2:#06b6d4;--muted:#9aa6bf;--glass: rgba(255,255,255,0.03)}
     *{box-sizing:border-box}html,body{height:100%}
     body{font-family:Inter,system-ui,Segoe UI,Arial;background:linear-gradient(180deg,#071029 0%, #071a2b 60%);color:#e6eef8;margin:0;display:flex;flex-direction:column;padding-bottom:calc(env(safe-area-inset-bottom, 0px) + 110px)}
-
     .app{max-width:1100px;margin:0 auto;padding:16px 16px 96px;flex:1;}
-
     header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
     .brand{display:flex;align-items:center;gap:12px}
     .logo{width:44px;height:44px;border-radius:10px;background:linear-gradient(135deg,var(--accent1),var(--accent2));display:flex;align-items:center;justify-content:center;color:white;font-weight:700;box-shadow:0 6px 18px rgba(12,17,28,0.6)}
@@ -43,6 +41,9 @@
     .nav-item.active{background:linear-gradient(90deg, rgba(124,58,237,0.14), rgba(6,182,212,0.08));color:white;box-shadow:0 8px 18px rgba(12,17,28,0.5)}
     .nav-item i{display:block;font-size:18px;margin-bottom:4px}
 
+    /* Profile alert text */
+    #profileText{background:linear-gradient(180deg, rgba(124,58,237,0.12), rgba(6,182,212,0.08));padding:12px;border-radius:12px;margin-top:12px;display:none;text-align:center;color:white;font-weight:600;}
+
     /* Modal */
     .modal-backdrop{position:fixed;inset:0;background:rgba(1,3,10,0.6);display:flex;align-items:center;justify-content:center;padding:18px;z-index:60;opacity:0;pointer-events:none;transition:opacity .18s}
     .modal-backdrop.show{opacity:1;pointer-events:auto}
@@ -50,9 +51,6 @@
     .modal h3{margin:0 0 8px}
     .modal p{color:var(--muted);margin:0 0 12px}
     .modal .actions{display:flex;gap:8px;justify-content:flex-end}
-
-    /* small helpers */
-    .muted{color:var(--muted)}
 
   </style>
 </head>
@@ -63,7 +61,7 @@
           <div class="logo">DB</div>
           <div>
             <h1>Donate Bridge</h1>
-            <div class="greet">Hello, <span id="greetName">Alex</span>!</div>
+            <div class="greet">Hello, <span id="greetName">Friend</span>!</div>
           </div>
         </div>
       <div class="actions">
@@ -74,57 +72,11 @@
     <section>
       <h2 style="margin:0 0 12px">Available Passes</h2>
       <div class="grid" id="passesGrid">
-        <!-- Pass cards inserted by HTML below -->
-
-        <article class="card" data-name="Coffee Boost" data-price="5">
-          <div class="imgwrap"><img src="https://picsum.photos/seed/coffee/200/200" alt="coffee"></div>
-          <div class="meta">
-            <div class="pass-name">Coffee Boost</div>
-            <div class="pass-desc">Small token to fuel the devs.</div>
-          </div>
-          <div class="right">
-            <div class="price">5 pts</div>
-            <button class="btn donateBtn">Donate</button>
-          </div>
-        </article>
-
-        <article class="card" data-name="Supporter" data-price="15">
-          <div class="imgwrap"><img src="https://picsum.photos/seed/support/200/200" alt="support"></div>
-          <div class="meta">
-            <div class="pass-name">Supporter</div>
-            <div class="pass-desc">A warm thank-you and a shoutout.</div>
-          </div>
-          <div class="right">
-            <div class="price">15 pts</div>
-            <button class="btn donateBtn">Donate</button>
-          </div>
-        </article>
-
-        <article class="card" data-name="Champion" data-price="50">
-          <div class="imgwrap"><img src="https://picsum.photos/seed/champion/200/200" alt="champion"></div>
-          <div class="meta">
-            <div class="pass-name">Champion</div>
-            <div class="pass-desc">Priority support + exclusive badge.</div>
-          </div>
-          <div class="right">
-            <div class="price">50 pts</div>
-            <button class="btn donateBtn">Donate</button>
-          </div>
-        </article>
-
-        <article class="card" data-name="Legacy" data-price="100">
-          <div class="imgwrap"><img src="https://picsum.photos/seed/legacy/200/200" alt="legacy"></div>
-          <div class="meta">
-            <div class="pass-name">Legacy</div>
-            <div class="pass-desc">All perks + lifetime recognition.</div>
-          </div>
-          <div class="right">
-            <div class="price">100 pts</div>
-            <button class="btn donateBtn">Donate</button>
-          </div>
-        </article>
-
+        <!-- Pass cards dynamically inserted from bot resources -->
       </div>
+
+      <!-- Profile text -->
+      <div id="profileText">This is your profile info. Click OK to dismiss.</div>
     </section>
   </div>
 
@@ -149,8 +101,10 @@
   </div>
 
   <script>
-    // Basic interactivity: open modal on Donate, show selected pass, handle confirm
-    const donateBtns = document.querySelectorAll('.donateBtn');
+    const passesGrid = document.getElementById('passesGrid');
+    const profileText = document.getElementById('profileText');
+    const profileBtn = document.getElementById('profileBtn');
+    const donateBtns = [];
     const modal = document.getElementById('modalBackdrop');
     const modalBody = document.getElementById('modalBody');
     const confirmBtn = document.getElementById('confirmDonate');
@@ -158,7 +112,6 @@
     const navItems = document.querySelectorAll('.nav-item');
 
     let selectedPass = null;
-
     const isTelegram = !!(window.Telegram && window.Telegram.WebApp);
     const tg = isTelegram ? window.Telegram.WebApp : null;
 
@@ -167,7 +120,7 @@
       if(el) el.textContent = name || 'Friend';
     }
 
-    // Initialize Telegram WebApp if available
+    // Initialize Telegram WebApp
     if(tg){
       try{
         tg.expand();
@@ -175,93 +128,63 @@
         const name = user ? ((user.first_name||'') + (user.last_name?(' '+user.last_name):'')).trim() : 'Friend';
         setGreeting(name);
 
-        // Configure MainButton
-        if(tg.MainButton){
-          tg.MainButton.setText('Donate');
-          tg.MainButton.setColor('#7c3aed');
-          tg.MainButton.setTextColor('#ffffff');
-          tg.MainButton.show();
-          tg.MainButton.onClick(() => {
-            if(selectedPass){
-              try{
-                tg.sendData(JSON.stringify({type:'donate', pass:selectedPass}));
-              }catch(e){
-                console.warn('sendData failed', e);
-              }
-              // optional: close the WebApp after sending
-              try{ tg.close(); }catch(e){}
-            } else {
-              // fallback
-              alert('Please select a pass to donate.');
-            }
-          });
+        // Example: receive passes from bot
+        tg.onEvent('mainButtonClicked', () => {});
+        // Or pass resources sent from bot on initData if configured
+        if(tg.initDataUnsafe && tg.initDataUnsafe.passResources){
+          const resources = tg.initDataUnsafe.passResources;
+          renderPasses(resources);
         }
-
       }catch(e){console.warn('Telegram init error', e)}
     }
 
-    donateBtns.forEach(btn => btn.addEventListener('click', (e) => {
-      const card = e.target.closest('.card');
-      selectedPass = {name: card.dataset.name, price: card.dataset.price};
-      modalBody.textContent = `${selectedPass.name} — ${selectedPass.price} pts. Confirm donation?`;
-      modal.classList.add('show');
+    function renderPasses(passArray){
+      passesGrid.innerHTML = '';
+      passArray.forEach(p=>{
+        const card = document.createElement('article');
+        card.className='card';
+        card.dataset.name = p.name;
+        card.dataset.price = p.price;
+        card.innerHTML = `
+          <div class="imgwrap"><img src="${p.icon}" alt="${p.name}"></div>
+          <div class="meta">
+            <div class="pass-name">${p.name}</div>
+            <div class="pass-desc">${p.desc}</div>
+          </div>
+          <div class="right">
+            <div class="price">${p.price} pts</div>
+            <button class="btn donateBtn">Donate</button>
+          </div>`;
+        passesGrid.appendChild(card);
+        card.querySelector('.donateBtn').addEventListener('click',()=>{
+          selectedPass = {name:p.name, price:p.price};
+          modalBody.textContent = `${p.name} — ${p.price} pts. Confirm donation?`;
+          modal.classList.add('show');
+          if(tg && tg.MainButton){ tg.MainButton.setText(`Donate ${p.price} pts`); tg.MainButton.show(); }
+        });
+      });
+    }
 
-      // update Telegram MainButton label when in WebApp
-      if(tg && tg.MainButton){
-        tg.MainButton.setText(`Donate ${selectedPass.price} pts`);
-        try{ tg.MainButton.show(); }catch(e){}
-      }
-    }));
-
-    cancelBtn.addEventListener('click', () => {
-      modal.classList.remove('show');
-      selectedPass = null;
-      if(tg && tg.MainButton){ tg.MainButton.setText('Donate'); }
-    });
-
+    cancelBtn.addEventListener('click', () => { modal.classList.remove('show'); selectedPass=null; if(tg&&tg.MainButton){tg.MainButton.setText('Donate');} });
     confirmBtn.addEventListener('click', () => {
       modal.classList.remove('show');
       if(selectedPass){
-        if(tg){
-          try{
-            tg.sendData(JSON.stringify({type:'donate', pass:selectedPass}));
-          }catch(e){
-            console.warn('sendData failed', e);
-            alert(`Thanks! You donated ${selectedPass.price} pts for ${selectedPass.name}.`);
-          }
-          try{ tg.close(); }catch(e){}
-        } else {
-          alert(`Thanks! You donated ${selectedPass.price} pts for ${selectedPass.name}.`);
-        }
+        if(tg){ try{ tg.sendData(JSON.stringify({type:'donate', pass:selectedPass})); tg.close(); }catch(e){console.warn(e);} }
+        else { alert(`Thanks! You donated ${selectedPass.price} pts for ${selectedPass.name}.`); }
         selectedPass = null;
       }
     });
 
-    // Bottom nav: highlight selected tab and simple routing placeholder
-    navItems.forEach(item => item.addEventListener('click', () => {
+    navItems.forEach(item=>item.addEventListener('click', ()=>{
       navItems.forEach(i=>i.classList.remove('active'));
       item.classList.add('active');
-      const tab = item.dataset.tab;
-      // Simple behavior: show alert or scroll
-      if(tab === 'donate'){
-        alert('Open Donate tab — you can wire this to filter or open modal.');
-      } else if(tab === 'profile'){
-        alert('Open Profile — connect to user info.');
-      } else if(tab === 'stats'){
-        alert('Open Stats — show donation stats.');
-      }
+      if(item.dataset.tab==='profile'){
+        profileText.style.display='block';
+      } else { profileText.style.display='none'; }
     }));
+    profileBtn.addEventListener('click', ()=>{ document.querySelector('.nav-item[data-tab="profile"]').click(); });
 
-    // Example: wire profile button to open profile nav
-    document.getElementById('profileBtn').addEventListener('click', ()=>{
-      document.querySelector('.nav-item[data-tab="profile"]').click();
-    });
-
-    // Keyboard accessibility: Esc closes modal
-    document.addEventListener('keydown', (e)=>{
-      if(e.key === 'Escape') modal.classList.remove('show');
-    });
-
+    document.addEventListener('keydown',(e)=>{ if(e.key==='Escape') modal.classList.remove('show'); });
   </script>
 </body>
 </html>
